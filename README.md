@@ -1,40 +1,42 @@
 # Image / Lab
 
-Twelve WebGL loaders that reveal an image when it is ready. Browse the collection, try a photo or upload your own, adjust the effect, then copy or download the React component.
+12 image loaders for React. Each effect has a playground, and you can download the source to use in your own project.
 
-The site follows [Dot Lab](https://dotlab.grantpedersen.com/): the same typography, colors, spacing, controls, and direct copy.
+The effects use WebGL. The downloaded component needs React and React DOM 18 or newer, plus `metal-fx@1.0.4`.
 
-## Run locally
+## Run the site
 
 Use Node.js 22.18 or newer.
 
 ```sh
 npm install
 npm run dev
-npm test
-npm run build
 ```
 
-The development site runs at [localhost:5174](http://localhost:5174). `npm run preview` serves the production build at [localhost:4174](http://localhost:4174).
+Open [localhost:5174](http://localhost:5174).
 
 ## Use a reveal
 
-Download or copy the full component from the site and save it as `ImageReveal.tsx`. It has a named export and includes all twelve effects. In your React app, install its `metal-fx` dependency:
+Click an effect to open the playground. Download `.tsx` saves the component and all 12 effects in one file, `ImageReveal.tsx`. Put that file in your React project and install its dependency:
 
 ```sh
 npm install metal-fx@1.0.4
 ```
 
-MetalFx 1.0.4 needs a renderer lifecycle fix for React StrictMode and repeated mounts. Copy [scripts/patch-metal-fx.mjs](scripts/patch-metal-fx.mjs) into your app and run it with Node after installing dependencies. This repository runs it automatically with `postinstall`. The patch only guards events from disposed canvases; it leaves the shader and presets unchanged.
+MetalFx 1.0.4 has a startup bug that can leave its border hidden in React StrictMode or after a replay. Download the fix from the playground's Code tab, or copy [patch-metal-fx.mjs](scripts/patch-metal-fx.mjs) into your app. Run it from your app folder after installing dependencies:
 
-The site uses Motion for its page and mobile-menu transitions. The exported reveal component does not depend on Motion.
+```sh
+node patch-metal-fx.mjs
+```
 
-The exported file includes your selected settings in its usage example. Those settings do not change the component's default props; pass them when you use it.
+If you keep the file in `scripts/`, use `node scripts/patch-metal-fx.mjs` instead. Add that command to your app's `postinstall` script so the fix survives a fresh install. This repository already does that. The fix changes renderer cleanup; the shader and presets stay the same.
+
+Then import the component:
 
 ```tsx
 import { ImageReveal } from './ImageReveal';
 
-export function GenerationPreview({
+export default function GenerationPreview({
   imageUrl,
   isGenerating,
 }: {
@@ -42,7 +44,7 @@ export function GenerationPreview({
   isGenerating: boolean;
 }) {
   return (
-    <div style={{ width: '100%', height: 400 }}>
+    <div style={{ height: 400 }}>
       <ImageReveal
         src={imageUrl}
         alt="Your generated image"
@@ -50,48 +52,79 @@ export function GenerationPreview({
         effect="pixel-mosaic"
         duration={3}
         speed={1}
-        intensity={0.6}
-        color="#baff66"
       />
     </div>
   );
 }
 ```
 
-Give the parent a height. The component fills its parent and crops the image to cover it. Keep `loading` true while your generation request runs; `src` can be empty until a URL is available. Set `loading` to false when the image is ready. The reveal waits for the image to load before starting. This library displays images; it does not generate them.
+Give the parent a height, as in the example. The component fills its parent and crops the image to cover it.
 
-| Prop | Default | Use |
+Keep `loading` true while your image generates. `src` can be empty until you have a URL. Set `loading` to false when the image is ready; the reveal waits for the image to load before starting.
+
+To use your playground settings, open the Code tab and choose Copy usage. Downloading the component doesn't change its defaults. Copy component and Download `.tsx` include your settings in a commented usage example.
+
+The exported file includes `'use client'` for React frameworks that use server components.
+
+## Props
+
+| Prop | Default | Description |
 | --- | --- | --- |
 | `src` | Required | Image URL, local path, or object URL. |
-| `alt` | `"Image preview"` | Describe the finished image; use `""` for decoration. |
-| `loading` | `false` | Hold the animated loader until the result is ready. |
-| `effect` | `"pixel-mosaic"` | Choose an effect from the list below. |
-| `duration` | `3` | Reveal duration in seconds, independent of loading speed. |
-| `speed` | `1` | Loading motion multiplier, from `0` to `3`; liquid metal uses its original speed. |
-| `intensity` | `0.6` | Effect strength, from `0` to `1`; unused by liquid metal. |
-| `color` | `"#baff66"` | Loader accent as a three- or six-digit hex color; unused by liquid metal. |
-| `progress` | Unset | Control the reveal from `0` to `1`; overrides automatic timing. |
-| `loop` | `false` | Repeat the loading, reveal, and hold phases for previews. |
-| `paused` | `false` | Pause both loading motion and reveal timing. |
-| `className` | `""` | Add a class to the wrapper. |
-| `onError` | Unset | Receive an image or WebGL error message. |
+| `alt` | `'Image preview'` | Describe the finished image. Use `''` for decoration. |
+| `loading` | `false` | Keep the loader running until the image is ready. |
+| `effect` | `'pixel-mosaic'` | Effect to draw. See the IDs below. |
+| `duration` | `3` | Reveal duration in seconds. |
+| `speed` | `1` | Loading speed multiplier, clamped between `0` and `3`. Zero freezes motion. |
+| `intensity` | `0.6` | Effect strength, clamped between `0` and `1`. |
+| `color` | `'#baff66'` | Loader color. Accepts a three- or six-digit hex color. |
+| `progress` | None | Set the reveal from `0` to `1` instead of using automatic timing. |
+| `loop` | `false` | Repeat the loading, reveal, and hold phases. |
+| `paused` | `false` | Freeze loading motion and reveal timing. |
+| `className` | None | CSS class for the wrapper. |
+| `onError` | None | Receive an image or WebGL error message. |
 
-For the shader effects, change `speed` while the loader runs to adjust its motion without restarting it. At `0`, the material stays still and the image still reveals over the chosen `duration`. Liquid metal uses MetalFx's original motion for any positive speed; `0` pauses its motion.
+Liquid metal uses its preset's color, strength, and speed. It ignores `color` and `intensity`; any positive `speed` uses its original motion, and `0` pauses it.
 
-Effects: `pixel-mosaic`, `noise-dissolve`, `liquid-metal`, `frosted-glass`, `dot-matrix`, `heat-haze`, `satin`, `exposure`, `woven`, `voronoi`, `blur`, and `brushed-metal`.
+## Effects
 
-Animations pause outside the viewport and when the tab is hidden. Reduced-motion preferences and unavailable WebGL use a still-image fallback. Remote images need permission for cross-origin texture loading (CORS); when that is unavailable, the component attempts to show the original image instead. Uploaded files stay in your browser.
+```text
+pixel-mosaic · noise-dissolve · liquid-metal · frosted-glass
+dot-matrix · heat-haze · satin · exposure
+woven · voronoi · blur · brushed-metal
+```
 
-Images are resampled to power-of-two texture dimensions, capped at 4,096 pixels per side or the device's lower texture limit. This supports filtered blur; the rendered image keeps its original aspect ratio.
+The playground calls `voronoi` Cellular and `blur` Soft focus.
 
-Liquid metal uses the original `<MetalFx preset="chromatic" strength={1} theme="dark">` border over the image. The overlay fades away when the image is ready. Its preset controls the color, intensity, and motion; the playground exposes reveal duration, pause, and progress. Liquid metal's usage example omits the unused appearance controls.
+## Motion
 
-## Checks and credits
+Loading speed and reveal duration are separate. Change `speed` while the loader runs to adjust its motion without restarting it. At zero speed, the loader stays still and the image still reveals over the chosen `duration`. Set `paused` to freeze both.
 
-`npm test` checks the effect catalog, timeline boundaries, selected export settings, and whether the downloaded component compiles with React and `metal-fx`. `npm run build` checks the application types and builds the site.
+Pixel mosaic cells take on the image's colors before resolving into detail. Liquid metal uses the original MetalFx chromatic border at full strength around a charcoal panel, then fades into the image. Its playground has controls for reveal duration, progress, and pause.
 
-With `npm run dev` running, open [the shader checks](http://localhost:5174/tests/shaders.html) to test the eleven custom shader effects, mosaic colors, and the final image on your browser's GPU. [MetalFx lifecycle checks](http://localhost:5174/tests/metal-fx-lifecycle.html) verify that the native border draws in StrictMode and reappears after repeated reveals.
+Animations stop when the preview leaves the viewport or the tab is hidden. People with reduced motion enabled see the image without animation. If WebGL is unavailable, the component shows a still image.
 
-The interface is adapted from Dot Lab under the included [MIT license](LICENSE). Example photographs are from Unsplash: [Alpine](https://images.unsplash.com/photo-1464822759023-fed622ff2c3b), [Forest](https://images.unsplash.com/photo-1441974231531-c6227db76b6e), [Coast](https://images.unsplash.com/photo-1518837695005-2083093ee35b), and [Desert](https://images.unsplash.com/photo-1509316785289-025f5b846b35).
+Remote images need cross-origin access (CORS) to work with WebGL. If an image can't be used as a texture, the component tries to display the original image instead. Uploaded preview images stay in your browser.
 
-Liquid metal uses the MIT-licensed [metal-fx package by Jakub Antalik](https://github.com/Jakubantalik/metal-fx), version 1.0.4. The original component supplies the chromatic border and its motion.
+## Development
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the local site. |
+| `npm run build` | Check TypeScript and build the site into `dist/`. |
+| `npm run preview` | Serve the built site at [localhost:4174](http://localhost:4174). |
+| `npm test` | Check the effect catalog, timing, loading speed, and exported component. |
+
+The shaders are in [reveals.ts](src/lib/reveals.ts). [ImageReveal.tsx](src/components/ImageReveal.tsx) handles image loading, drawing, and motion. Images are resized for WebGL textures, with a maximum of 4,096 pixels per side or the device's lower limit. The displayed image keeps its original aspect ratio.
+
+With the site running, open the [shader checks](http://localhost:5174/tests/shaders.html) to check the effects on your browser's GPU. The [MetalFx lifecycle checks](http://localhost:5174/tests/metal-fx-lifecycle.html) check that its border draws in StrictMode and reappears after repeated reveals.
+
+The website uses React, TypeScript, Vite, and [Motion](https://motion.dev/) for page and mobile-menu transitions. The downloaded component doesn't depend on Motion.
+
+## License and credit
+
+[MIT](LICENSE). You can use this in personal and commercial projects. Keep the license notice when distributing the code.
+
+The website shares its interface with [Dotlab](https://dotlab.grantpedersen.com/). Liquid metal uses the MIT-licensed [metal-fx package by Jakub Antalik](https://github.com/Jakubantalik/metal-fx).
+
+Example photographs are from Unsplash: [Alpine](https://images.unsplash.com/photo-1464822759023-fed622ff2c3b), [Forest](https://images.unsplash.com/photo-1441974231531-c6227db76b6e), [Coast](https://images.unsplash.com/photo-1518837695005-2083093ee35b), and [Desert](https://images.unsplash.com/photo-1509316785289-025f5b846b35).

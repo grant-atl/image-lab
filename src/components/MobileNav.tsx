@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-export function MobileNav({ onPlayground, onDownload, reducedMotion, effectCount }: {
+export function MobileNav({ onPlayground, reducedMotion, effectCount }: {
   onPlayground: () => void;
-  onDownload: () => void;
   reducedMotion: boolean;
   effectCount: number;
 }) {
@@ -94,11 +93,11 @@ export function MobileNav({ onPlayground, onDownload, reducedMotion, effectCount
               Playground <span className="mobile-menu-arrow" aria-hidden="true">→</span>
             </motion.button>
             <motion.a className="mobile-menu-link" href="https://dotlab.grantpedersen.com/" target="_blank" rel="noreferrer" variants={rows} custom={2} onClick={select}>
-              Dot Lab <span className="mobile-menu-arrow" aria-hidden="true">↗</span>
+              Dotlab <span className="mobile-menu-arrow" aria-hidden="true">↗</span>
             </motion.a>
-            <motion.button type="button" className="mobile-menu-link" variants={rows} custom={3} onClick={() => { select(); onDownload(); }}>
-              Get the source <span className="mobile-menu-arrow" aria-hidden="true">↓</span>
-            </motion.button>
+            <motion.a className="mobile-menu-link" href="https://github.com/grant-atl/image-lab" target="_blank" rel="noreferrer" variants={rows} custom={3} onClick={select}>
+              GitHub <span className="mobile-menu-arrow" aria-hidden="true">↗</span>
+            </motion.a>
           </motion.nav>
         )}
       </AnimatePresence>

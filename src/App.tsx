@@ -6,7 +6,6 @@ import { RevealPlayground } from "./components/RevealPlayground";
 import { Icon, Toast } from "./components/ui";
 import { EFFECTS, type EffectId } from "./lib/reveals";
 import { SAMPLES } from "./lib/samples";
-import { buildComponent, saveComponent } from "./lib/export";
 
 const HERO_EFFECTS: EffectId[] = ["pixel-mosaic", "liquid-metal", "dot-matrix"];
 
@@ -59,7 +58,6 @@ export default function App() {
   const stopMotion = paused || reducedMotion || !!selected;
   const shown = EFFECTS.filter(effect => (category === "All effects" || effect.category === category) && `${effect.name} ${effect.description} ${effect.category}`.toLowerCase().includes(query.trim().toLowerCase()));
   const currentHero = EFFECTS.find(effect => effect.id === heroEffect)!;
-  const downloadSource = () => saveComponent(buildComponent({ effect: "pixel-mosaic", duration: 3, speed: 1, intensity: 0.6, color: "#baff66" }));
   const pauseLabel = reducedMotion ? "Reduced motion enabled" : paused ? "Play all reveals" : "Pause all reveals";
 
   return <>
@@ -69,12 +67,12 @@ export default function App() {
       <nav aria-label="Main navigation">
         <a className="nav-active" href="#collection" aria-current="page">Image reveals <span className="nav-count">{EFFECTS.length}</span></a>
         <button onClick={() => setSelected(heroEffect)}>Playground</button>
-        <a href="https://dotlab.grantpedersen.com/" target="_blank" rel="noreferrer">Dot Lab <Icon name="external" size={11} /></a>
+        <a href="https://dotlab.grantpedersen.com/" target="_blank" rel="noreferrer">Dotlab <Icon name="external" size={11} /></a>
       </nav>
-      <button className="header-source" onClick={downloadSource}>
-        <Icon name="code" size={17} /><span>Get the source</span><Icon name="down" size={13} />
-      </button>
-      <MobileNav onPlayground={() => setSelected(heroEffect)} onDownload={downloadSource} reducedMotion={reducedMotion} effectCount={EFFECTS.length} />
+      <a className="header-source" href="https://github.com/grant-atl/image-lab" target="_blank" rel="noreferrer" aria-label="View source on GitHub">
+        <Icon name="code" size={17} /><span>GitHub</span><Icon name="external" size={13} />
+      </a>
+      <MobileNav onPlayground={() => setSelected(heroEffect)} reducedMotion={reducedMotion} effectCount={EFFECTS.length} />
     </header>
 
     <motion.main
@@ -146,7 +144,7 @@ export default function App() {
       </section>
     </motion.main>
 
-    <footer className="site-footer"><Brand /><div><a href="https://dotlab.grantpedersen.com/" target="_blank" rel="noreferrer">More at Dot Lab <Icon name="external" size={12} /></a><span>FREE TO USE · MIT LICENSE</span></div></footer>
+    <footer className="site-footer"><Brand /><div><a href="https://dotlab.grantpedersen.com/" target="_blank" rel="noreferrer">More at Dotlab <Icon name="external" size={12} /></a><span>FREE TO USE · MIT LICENSE</span></div></footer>
     {selected && <RevealPlayground key={selected} initialEffect={selected} reducedMotion={reducedMotion} message={toast} onClose={() => setSelected(null)} onCopy={copy} />}
     {!selected && <Toast message={toast} />}
   </>;

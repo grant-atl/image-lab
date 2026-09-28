@@ -1,4 +1,4 @@
-/* Shared typography, spacing, controls, and cards come from Dot Lab's styles.css. */
+/* Shared typography, spacing, controls, and cards come from Dotlab's styles.css. */
 .image-page .hero-copy > p { max-width: 370px; }
 .site-header > nav a { display: inline-flex; align-items: center; gap: 6px; }
 .image-hero-art { margin-left: 28px; }
