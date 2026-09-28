@@ -97,7 +97,6 @@ export default function App() {
         <div className="hero-art image-hero-art">
           <div className="hero-image-frame">
             <ImageReveal key={`${heroEffect}-${replay}`} src={SAMPLES[0].src} alt={SAMPLES[0].alt} effect={heroEffect} loop duration={3.8} paused={stopMotion} />
-            <span className="image-frame-caption">{reducedMotion ? "STILL PREVIEW" : "LIVE PREVIEW"}<i /></span>
           </div>
           <div className="hero-art-footer">
             <span><i />{currentHero.name}</span>
@@ -131,7 +130,6 @@ export default function App() {
             return <button className="animation-card image-card" key={effect.id} onClick={() => setSelected(effect.id)} aria-label={`Customize ${effect.name}: ${effect.description}`}>
               <div className="card-stage">
                 <span className="card-number">{String(index + 1).padStart(2, "0")}</span>
-                <span className="card-preview-label">{reducedMotion ? "STILL PREVIEW" : "LIVE PREVIEW"}<span /></span>
                 <div className="card-image-frame"><ImageReveal src={sample.src} alt="" effect={effect.id} loop duration={3 + (index % 3) * 0.6} paused={stopMotion} /></div>
                 <span className="card-use">Customize <Icon name="arrow" size={15} /></span>
               </div>

@@ -3,12 +3,9 @@
 .site-header > nav a { display: inline-flex; align-items: center; gap: 6px; }
 .image-hero-art { margin-left: 28px; }
 .hero-image-frame { position: absolute; inset: 50px 0 85px 0; overflow: hidden; border: 1px solid #36402e; border-radius: 7px; background: #171b14; }
-.image-frame-caption { position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 7px; border: 1px solid #ffffff1a; border-radius: 3px; padding: 6px 8px; background: #111310b8; color: #d5dfcb; font: 7px var(--mono); letter-spacing: 1px; }
-.image-frame-caption i { width: 4px; height: 4px; border-radius: 50%; background: var(--lime); }
 .image-hero-art .hero-art-footer { left: 0; bottom: 39px; }
 .image-page .collection-intro > p { color: #939e87; font-size: 12px; }
 .card-image-frame { position: absolute; inset: 43px 19px 20px; overflow: hidden; border: 1px solid #35402d; border-radius: 4px; }
-.image-card .card-preview-label { color: #89967d; }
 .image-card .card-info { min-height: 90px; align-items: flex-start; }
 .image-card .card-info .category-label { margin-top: 1px; }
 .image-card .card-info p { max-width: 245px; line-height: 1.6; }

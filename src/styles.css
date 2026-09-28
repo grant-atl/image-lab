@@ -591,25 +591,6 @@ main,
   font: 10px var(--mono);
   color: #758066;
 }
-.card-preview-label {
-  position: absolute;
-  z-index: 1;
-  top: 18px;
-  right: 17px;
-  font: 7px var(--mono);
-  letter-spacing: 0.8px;
-  color: #5b6950;
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
-.card-preview-label > span {
-  display: block;
-  width: 3px;
-  height: 3px;
-  background: #7b965f;
-  border-radius: 50%;
-}
 .card-use {
   position: absolute;
   bottom: 14px;
