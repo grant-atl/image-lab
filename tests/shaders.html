@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Shader checks</title>
+<style>body{background:#111;color:#eee;font:14px/1.6 monospace;padding:24px}canvas{width:384px;height:288px;image-rendering:pixelated}pre{white-space:pre-wrap}</style>
+<h1>Shader checks</h1>
+<canvas width="128" height="96" aria-label="Shader output"></canvas>
+<pre role="status">Running…</pre>
+<script type="module">
+import { EFFECTS, REVEAL_VERTEX_SHADER, REVEAL_FRAGMENT_SHADER } from '/src/lib/reveals.ts';
+
+const output = document.querySelector('pre'), canvas = document.querySelector('canvas');
+const checks = [];
+const assert = (condition, message) => { if (!condition) throw new Error(message); };
+const pass = message => { checks.push(message); output.textContent = checks.join('\n'); };
+const gl = canvas.getContext('webgl', { alpha: false, antialias: false });
+try {
+  assert(gl, 'WebGL is unavailable');
+  const compile = (type, source) => {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source); gl.compileShader(shader);
+    assert(gl.getShaderParameter(shader, gl.COMPILE_STATUS), gl.getShaderInfoLog(shader));
+    return shader;
+  };
+  const program = gl.createProgram();
+  for (const shader of [compile(gl.VERTEX_SHADER, REVEAL_VERTEX_SHADER), compile(gl.FRAGMENT_SHADER, REVEAL_FRAGMENT_SHADER)]) {
+    gl.attachShader(program, shader); gl.deleteShader(shader);
+  }
+  gl.linkProgram(program);
+  assert(gl.getProgramParameter(program, gl.LINK_STATUS), gl.getProgramInfoLog(program));
+  gl.useProgram(program); pass('PASS: shaders compile and link');
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
+  const position = gl.getAttribLocation(program, 'aPosition');
+  gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+  const uniform = name => gl.getUniformLocation(program, name);
+  const target = [219, 52, 31, 255];
+  const texture = (width, height, pixels) => {
+    const value = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, value);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return value;
+  };
+  gl.activeTexture(gl.TEXTURE0);
+  const photo = texture(1, 1, new Uint8Array(target));
+  gl.uniform1i(uniform('uTexture'), 0);
+  gl.uniform2f(uniform('uImageSize'), 128, 96);
+  gl.uniform3f(uniform('uColor'), 0.73, 1, 0.4);
+  gl.uniform1f(uniform('uTime'), 2);
+  gl.uniform1f(uniform('uIntensity'), 0.6);
+  const draw = (width, height, progress) => {
+    gl.viewport(0, 0, width, height); gl.uniform2f(uniform('uResolution'), width, height);
+    gl.uniform1f(uniform('uProgress'), progress); gl.drawArrays(gl.TRIANGLES, 0, 6);
+    const pixels = new Uint8Array(width * height * 4);
+    gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    const error = gl.getError(); assert(error === gl.NO_ERROR, `WebGL error: 0x${error.toString(16)}`);
+    return pixels;
+  };
+  for (let effect = 0; effect < EFFECTS.length; effect++) {
+    if (EFFECTS[effect].id === 'liquid-metal') continue;
+    gl.uniform1i(uniform('uEffect'), effect);
+    draw(128, 96, 0); draw(128, 96, 0.5);
+  }
+  pass('PASS: all eleven custom shader effects render without WebGL errors');
+  gl.uniform1i(uniform('uEffect'), 0);
+  const colorDistance = pixels => pixels.reduce((sum, value, index) =>
+    sum + (index % 4 === 3 ? 0 : Math.abs(value - target[index % 4])), 0);
+  const mosaicWaiting = draw(128, 96, 0), mosaicColored = draw(128, 96, 0.4);
+  assert(colorDistance(mosaicColored) < colorDistance(mosaicWaiting) * 0.6,
+    'Mosaic cells must adopt the image colors before the detail reveal begins');
+  pass('PASS: mosaic cells adopt image colors before resolving image detail');
+  for (let effect = 0; effect < EFFECTS.length; effect++) {
+    gl.uniform1i(uniform('uEffect'), effect);
+    assert(draw(128, 96, 1).every((value, index) => Math.abs(value - target[index % 4]) <= 2), `${EFFECTS[effect].id} changes the finished photograph`);
+  }
+  pass('PASS: all twelve effect slots return the exact underlying photograph at 100%');
+  gl.deleteTexture(photo);
+  gl.deleteBuffer(buffer); gl.deleteProgram(program);
+  document.body.dataset.result = 'passed'; document.title = 'PASS — Shader checks';
+} catch (error) {
+  document.body.dataset.result = 'failed'; document.title = 'FAIL — Shader checks';
+  output.textContent = [...checks, `FAIL: ${error.message}`].join('\n'); console.error(error);
+}
+</script>
+</html>

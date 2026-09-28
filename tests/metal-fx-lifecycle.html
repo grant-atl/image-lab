@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>MetalFx lifecycle checks</title>
+<h1>MetalFx lifecycle checks</h1>
+<pre id="result">Running…</pre>
+<div id="root" style="width:320px;height:200px"></div>
+<script type="module">
+  import React, { StrictMode } from 'react';
+  import { createRoot } from 'react-dom/client';
+  import { ImageReveal } from '../src/components/ImageReveal';
+
+  const root = createRoot(document.getElementById('root'));
+  const result = document.getElementById('result');
+  const until = async (condition) => {
+    const deadline = performance.now() + 4000;
+    while (!condition()) {
+      if (performance.now() > deadline) throw new Error('MetalFx did not reach the expected visible state');
+      await new Promise(requestAnimationFrame);
+    }
+  };
+  try {
+    for (const progress of [0, 1, 0, 1, 0]) {
+      root.render(React.createElement(StrictMode, null, React.createElement(ImageReveal, {
+        src: '/images/alpine.jpg', effect: 'liquid-metal', progress, paused: true,
+      })));
+      await until(() => {
+        const metal = document.querySelector('.metal-fx-root');
+        if (progress === 1) return !metal;
+        if (!metal || getComputedStyle(metal).visibility !== 'visible') return false;
+        const canvas = metal.querySelector('canvas');
+        const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+        return pixels.some((value, index) => index % 4 === 3 && value > 0);
+      });
+    }
+    document.title = 'PASS — MetalFx lifecycle checks';
+    result.textContent = 'PASS: native MetalFx draws in StrictMode and reappears after repeated reveals';
+  } catch (error) {
+    document.title = 'FAIL — MetalFx lifecycle checks';
+    result.textContent = `FAIL: ${error.message}`;
+  }
+</script>
+</html>

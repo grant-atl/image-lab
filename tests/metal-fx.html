@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>MetalFx reference</title>
+<style>
+  body { margin: 0; background: #111310; color: #e8ece3; font: 15px/1.5 sans-serif; }
+  main { max-width: 660px; margin: 64px auto; padding: 24px; }
+  h1 { font-size: 26px; font-weight: 500; }
+  p { color: #969d8e; }
+  section { margin-top: 48px; }
+  button { padding: 12px 24px; border-radius: 24px; color: inherit; font: inherit; }
+  .frame { width: 100%; height: 280px; }
+</style>
+<main>
+  <h1>MetalFx reference</h1>
+  <p>The installed metal-fx package, using the chromatic preset at full strength.</p>
+  <div id="root"></div>
+</main>
+<script type="module">
+  import React from 'react';
+  import { createRoot } from 'react-dom/client';
+  import { MetalFx } from 'metal-fx';
+  const h = React.createElement;
+  createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h('section', null,
+      h(MetalFx, { preset: 'chromatic', strength: 1, theme: 'dark' }, h('button', null, 'Upgrade to Pro'))),
+    h('section', null,
+      h('p', null, 'The same component around an image frame.'),
+      h(MetalFx, { preset: 'chromatic', strength: 1, theme: 'dark', borderRadius: 6, style: { width: '100%', height: 280 } },
+        h('div', { className: 'frame', role: 'img', 'aria-label': 'Loading image frame' })))));
+</script>
+</html>
