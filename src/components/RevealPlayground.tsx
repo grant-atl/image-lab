@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import { ImageReveal } from "./ImageReveal";
 import { COLORS, Icon, Toast, useDialog, type CopyHandler } from "./ui";
 import { EFFECTS, type EffectId } from "../lib/reveals";
 import { SAMPLES } from "../lib/samples";
-import { buildComponent, buildUsage, saveComponent, type RevealSettings } from "../lib/export";
+import { buildComponent, buildUsage, metalFxFixPrompt, saveComponent, type RevealSettings } from "../lib/export";
 import metalFxPatchUrl from "../../scripts/patch-metal-fx.mjs?url";
 import "./reveal-playground.css";
 
@@ -31,6 +32,7 @@ export function RevealPlayground({ initialEffect, reducedMotion, message, onClos
 }) {
   const [settings, setSettings] = useState<RevealSettings>({ ...DEFAULTS, effect: initialEffect });
   const [tab, setTab] = useState<"preview" | "code">("preview");
+  const [installTipOpen, setInstallTipOpen] = useState(false);
   const [image, setImage] = useState<{ src: string; name: string; alt: string }>(SAMPLES[0]);
   const [loop, setLoop] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -184,6 +186,19 @@ export function RevealPlayground({ initialEffect, reducedMotion, message, onClos
             </div>
             <button className="text-button reset-button" onClick={reset}><Icon name="reset" size={13} />Reset settings</button>
             <div className="export-actions">
+              <div className="reveal-export-setup">
+                <button type="button" className="text-button reveal-install-toggle" aria-expanded={installTipOpen} aria-controls="reveal-install-tip" onClick={() => setInstallTipOpen(!installTipOpen)}>
+                  Tip for install <span aria-hidden="true">{installTipOpen ? "−" : "+"}</span>
+                </button>
+                <motion.div id="reveal-install-tip" className="reveal-install-content" aria-hidden={!installTipOpen} inert={!installTipOpen} initial={false} animate={{ height: installTipOpen ? "auto" : 0, opacity: installTipOpen ? 1 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}>
+                  <div>
+                    <p className="reveal-note">Every effect needs <code>metal-fx@1.0.4</code> and its fix.</p>
+                    <p className="reveal-note"><a href={metalFxPatchUrl} download="patch-metal-fx.mjs">Download the MetalFx fix</a>, then run <code>node patch-metal-fx.mjs</code> from your app folder after installing dependencies.</p>
+                    <p className="reveal-note">Or copy the AI fix prompt and paste it into your coding agent.</p>
+                    <button className="text-button" onClick={() => onCopy(metalFxFixPrompt, "AI fix prompt copied")}><Icon name="copy" size={14} />Copy AI fix prompt</button>
+                  </div>
+                </motion.div>
+              </div>
               <button className="button button-primary" onClick={() => onCopy(buildComponent(settings), "Complete React component copied")}><Icon name="copy" size={17} />Copy component</button>
               <button className="button button-secondary" onClick={() => saveComponent(buildComponent(settings))}><Icon name="down" size={16} />Download .tsx</button>
             </div>

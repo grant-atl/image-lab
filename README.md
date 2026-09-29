@@ -31,6 +31,8 @@ node patch-metal-fx.mjs
 
 If you keep the file in `scripts/`, use `node scripts/patch-metal-fx.mjs` instead. Add that command to your app's `postinstall` script so the fix survives a fresh install. This repository already does that. The fix corrects renderer cleanup and the CommonJS entry; the shader and presets stay the same.
 
+Open **Tip for install** above the component export buttons for the fix download and run command, or choose **Copy AI fix prompt** and paste it into your coding agent. The tip is available for every effect in both Preview and Code, and its expansion respects reduced motion.
+
 Then import the component:
 
 ```tsx

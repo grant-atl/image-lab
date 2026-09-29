@@ -34,6 +34,12 @@
 .reveal-image-error:empty { display: none; }
 .reveal-dialog .reveal-usage { height: auto; min-height: 430px; }
 .reveal-usage p + p { margin-top: 12px; }
+.reveal-export-setup { grid-column: 1 / -1; margin-bottom: 5px; }
+.reveal-install-toggle { width: 100%; min-height: 44px; justify-content: space-between; }
+.reveal-install-content { overflow: hidden; }
+.reveal-install-content > div { display: grid; gap: 9px; padding: 4px 0 12px; }
+.reveal-export-setup .reveal-note { margin-top: 0; }
+.reveal-export-setup .text-button { justify-self: start; }
 @media (max-width: 650px) {
   .reveal-dialog .playground-layout { display: grid; grid-template-columns: minmax(0, 1fr); }
   .reveal-dialog .reveal-settings { display: block; border-top: 1px solid #35432b; padding-top: 22px; }

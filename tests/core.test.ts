@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile as readSourceFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import ts from 'typescript';
@@ -44,7 +44,12 @@ test('loading speed supports still motion, fractional rates, and bounded input',
 test('download uses native MetalFx and preserves the applicable effect settings', async () => {
   const server = await createServer({ server: { middlewareMode: true, hmr: false, ws: false }, appType: 'custom' });
   try {
-    const { buildComponent, buildUsage } = await server.ssrLoadModule('/src/lib/export.ts');
+    const { buildComponent, buildUsage, metalFxFixPrompt } = await server.ssrLoadModule('/src/lib/export.ts');
+    assert.ok(
+      metalFxFixPrompt.includes(await readSourceFile(resolve('scripts/patch-metal-fx.mjs'), 'utf8'))
+      && metalFxFixPrompt.includes('metal-fx@1.0.4')
+      && metalFxFixPrompt.includes('node scripts/patch-metal-fx.mjs'),
+      'The AI fix prompt must include the complete current patch, pinned version, and run command.');
     const settings = { effect: 'liquid-metal', duration: 4.5, speed: 0.5, intensity: 0.35, color: '#123abc' };
     const source: string = buildComponent(settings);
     const usage: string = buildUsage(settings);
@@ -115,6 +120,14 @@ test('download uses native MetalFx and preserves the applicable effect settings'
 
     const directory = await mkdtemp(resolve('node_modules/.image-export-'));
     try {
+      await writeFile(`${directory}/package.json`, '{"type":"commonjs"}\n');
+      const nodeComponentPath = `${directory}/ImageReveal.tsx`;
+      await writeFile(nodeComponentPath, source);
+      const nodeDiagnostics = ts.getPreEmitDiagnostics(ts.createProgram([nodeComponentPath], {
+        ...options, module: ts.ModuleKind.Node16, moduleResolution: ts.ModuleResolutionKind.Node16,
+      }));
+      assert.equal(nodeDiagnostics.length, 0, nodeDiagnostics.map(diagnostic => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')).join('\n'));
+
       for (const [module, extension] of [[ts.ModuleKind.CommonJS, 'cjs'], [ts.ModuleKind.ESNext, 'mjs']] as const) {
         await writeFile(`${directory}/ImageReveal.${extension}`, ts.transpileModule(source, {
           compilerOptions: { target: ts.ScriptTarget.ES2022, module, jsx: ts.JsxEmit.ReactJSX },

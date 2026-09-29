@@ -9,9 +9,10 @@ const packagePath = `${root}/package.json`
 const metadata = JSON.parse(await readFile(packagePath, 'utf8'))
 assert.equal(metadata.version, '1.0.4', 'Review the metal-fx patch before upgrading the package.')
 
-// The package is ESM, so its require entry must use a .cjs extension.
+// The package is ESM, so require needs .cjs code and .d.cts declarations.
 assert.ok(['dist/index.cjs.js', 'dist/index.cjs'].includes(metadata.main), 'Unexpected metal-fx main entry.')
 assert.ok(['./dist/index.cjs.js', './dist/index.cjs'].includes(metadata.exports?.['.']?.require?.default), 'Unexpected metal-fx require entry.')
+assert.ok(['./dist/index.d.ts', './dist/index.d.cts'].includes(metadata.exports?.['.']?.require?.types), 'Unexpected metal-fx require types.')
 
 const patches = [
   {
@@ -49,6 +50,8 @@ for (const update of updates) if (update) await writeFile(update.path, update.so
 
 // Keep the original bundle so hash validation still works on repeated installs.
 await writeFile(`${root}/dist/index.cjs`, await readFile(`${root}/dist/index.cjs.js`))
+await writeFile(`${root}/dist/index.d.cts`, await readFile(`${root}/dist/index.d.ts`))
 metadata.main = 'dist/index.cjs'
 metadata.exports['.'].require.default = './dist/index.cjs'
+metadata.exports['.'].require.types = './dist/index.d.cts'
 await writeFile(packagePath, `${JSON.stringify(metadata, null, 2)}\n`)
