@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { Icon } from "./ui";
 
 export function MobileNav({ onPlayground, reducedMotion, effectCount }: {
   onPlayground: () => void;
@@ -90,13 +91,13 @@ export function MobileNav({ onPlayground, reducedMotion, effectCount }: {
               Image reveals <span className="mobile-menu-arrow" aria-hidden="true">{effectCount}</span>
             </motion.a>
             <motion.button type="button" className="mobile-menu-link" variants={rows} custom={1} onClick={() => { select(); onPlayground(); }}>
-              Playground <span className="mobile-menu-arrow" aria-hidden="true">→</span>
+              Playground <span className="mobile-menu-arrow" aria-hidden="true"><Icon name="arrow" size={18} /></span>
             </motion.button>
             <motion.a className="mobile-menu-link" href="https://dotlab.grantpedersen.com/" target="_blank" rel="noreferrer" variants={rows} custom={2} onClick={select}>
-              Dotlab <span className="mobile-menu-arrow" aria-hidden="true">↗</span>
+              Dotlab <span className="mobile-menu-arrow" aria-hidden="true"><Icon name="arrow-up-right" size={18} /></span>
             </motion.a>
             <motion.a className="mobile-menu-link" href="https://github.com/grant-atl/image-lab" target="_blank" rel="noreferrer" variants={rows} custom={3} onClick={select}>
-              GitHub <span className="mobile-menu-arrow" aria-hidden="true">↗</span>
+              GitHub <span className="mobile-menu-arrow" aria-hidden="true"><Icon name="arrow-up-right" size={18} /></span>
             </motion.a>
           </motion.nav>
         )}

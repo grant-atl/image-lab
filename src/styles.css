@@ -1316,6 +1316,8 @@ dialog::backdrop {
     background: #252e1e;
   }
   .mobile-menu-arrow {
+    display: inline-flex;
+    align-items: center;
     color: #9caf87;
     font-size: 20px;
   }

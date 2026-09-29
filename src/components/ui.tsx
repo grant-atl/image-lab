@@ -3,6 +3,7 @@ import { closeDialog } from "../lib/dialog";
 
 type IconName =
   | "arrow"
+  | "arrow-up-right"
   | "down"
   | "code"
   | "copy"
@@ -18,6 +19,7 @@ type IconName =
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, React.ReactNode> = {
     arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
+    "arrow-up-right": <path d="M7 17 17 7M7 7h10v10" />,
     down: <path d="M12 4v15m-6-6 6 6 6-6" />,
     code: (
       <>
