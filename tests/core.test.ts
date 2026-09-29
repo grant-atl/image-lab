@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import ts from 'typescript';
@@ -110,6 +112,29 @@ test('download uses native MetalFx and preserves the applicable effect settings'
       getCurrentDirectory: () => process.cwd(),
       getNewLine: () => '\n',
     }));
+
+    const directory = await mkdtemp(resolve('node_modules/.image-export-'));
+    try {
+      for (const [module, extension] of [[ts.ModuleKind.CommonJS, 'cjs'], [ts.ModuleKind.ESNext, 'mjs']] as const) {
+        await writeFile(`${directory}/ImageReveal.${extension}`, ts.transpileModule(source, {
+          compilerOptions: { target: ts.ScriptTarget.ES2022, module, jsx: ts.JsxEmit.ReactJSX },
+        }).outputText);
+        const consumer = spawnSync(process.execPath, ['--input-type=module', '--eval', `
+          import assert from 'node:assert/strict';
+          import { createElement } from 'react';
+          import { renderToString } from 'react-dom/server';
+          import { ImageReveal, EFFECTS } from './ImageReveal.${extension}';
+          for (const { id } of EFFECTS) {
+            const html = renderToString(createElement(ImageReveal, { effect: id, src: '', loading: true }));
+            assert.match(html, /<canvas/);
+            assert.match(html, /aria-busy="true"/);
+          }
+        `], { cwd: directory, encoding: 'utf8', timeout: 10000 });
+        assert.equal(consumer.status, 0, consumer.error?.message ?? consumer.stderr);
+      }
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   } finally {
     await server.close();
   }

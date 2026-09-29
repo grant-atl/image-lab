@@ -3,10 +3,15 @@ import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 
 // metal-fx 1.0.4 lets an old canvas's loss event stop a replacement renderer.
-// Remove this patch when upstream guards its context handlers by canvas identity.
+// It also labels its CommonJS entry as ESM. Remove this patch when both are fixed upstream.
 const root = `${process.cwd()}/node_modules/metal-fx`
-const { version } = JSON.parse(await readFile(`${root}/package.json`, 'utf8'))
-assert.equal(version, '1.0.4', 'Review the metal-fx context patch before upgrading the package.')
+const packagePath = `${root}/package.json`
+const metadata = JSON.parse(await readFile(packagePath, 'utf8'))
+assert.equal(metadata.version, '1.0.4', 'Review the metal-fx patch before upgrading the package.')
+
+// The package is ESM, so its require entry must use a .cjs extension.
+assert.ok(['dist/index.cjs.js', 'dist/index.cjs'].includes(metadata.main), 'Unexpected metal-fx main entry.')
+assert.ok(['./dist/index.cjs.js', './dist/index.cjs'].includes(metadata.exports?.['.']?.require?.default), 'Unexpected metal-fx require entry.')
 
 const patches = [
   {
@@ -41,3 +46,9 @@ const updates = await Promise.all(patches.map(async ({ file, before, after, edit
   return { path, source }
 }))
 for (const update of updates) if (update) await writeFile(update.path, update.source)
+
+// Keep the original bundle so hash validation still works on repeated installs.
+await writeFile(`${root}/dist/index.cjs`, await readFile(`${root}/dist/index.cjs.js`))
+metadata.main = 'dist/index.cjs'
+metadata.exports['.'].require.default = './dist/index.cjs'
+await writeFile(packagePath, `${JSON.stringify(metadata, null, 2)}\n`)

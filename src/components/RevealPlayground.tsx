@@ -164,7 +164,7 @@ export function RevealPlayground({ initialEffect, reducedMotion, message, onClos
               <pre><code>{buildUsage(settings)}</code></pre>
               <p>Save the component as <strong>ImageReveal.tsx</strong>. Set <code>loading</code> while an image is generating, then pass the finished image to <code>src</code>.</p>
               <p>Copy component and Download .tsx include all effects and your settings. Install <code>metal-fx@1.0.4</code> alongside React.</p>
-              <p><a href={metalFxPatchUrl} download="patch-metal-fx.mjs">Download the MetalFx fix</a> and run <code>node patch-metal-fx.mjs</code> from your app folder after installing dependencies. This fixes the package’s preview startup; its appearance stays the same.</p>
+              <p><a href={metalFxPatchUrl} download="patch-metal-fx.mjs">Download the MetalFx fix</a> and run <code>node patch-metal-fx.mjs</code> from your app folder after installing dependencies. This fixes the package’s preview startup and CommonJS imports; its appearance stays the same.</p>
               <p>The preview image is not included. Use an image from your app.</p>
             </div>}
           </div>

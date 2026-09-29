@@ -23,13 +23,13 @@ Click an effect to open the playground. Download `.tsx` saves the component and 
 npm install metal-fx@1.0.4
 ```
 
-MetalFx 1.0.4 has a startup bug that can leave its border hidden in React StrictMode or after a replay. Download the fix from the playground's Code tab, or copy [patch-metal-fx.mjs](scripts/patch-metal-fx.mjs) into your app. Run it from your app folder after installing dependencies:
+MetalFx 1.0.4 has a startup bug that can leave its border hidden in React StrictMode or after a replay. Its CommonJS entry also has the wrong file extension, which prevents CommonJS consumers from importing the component. Download the fix from the playground's Code tab, or copy [patch-metal-fx.mjs](scripts/patch-metal-fx.mjs) into your app. Run it from your app folder after installing dependencies:
 
 ```sh
 node patch-metal-fx.mjs
 ```
 
-If you keep the file in `scripts/`, use `node scripts/patch-metal-fx.mjs` instead. Add that command to your app's `postinstall` script so the fix survives a fresh install. This repository already does that. The fix changes renderer cleanup; the shader and presets stay the same.
+If you keep the file in `scripts/`, use `node scripts/patch-metal-fx.mjs` instead. Add that command to your app's `postinstall` script so the fix survives a fresh install. This repository already does that. The fix corrects renderer cleanup and the CommonJS entry; the shader and presets stay the same.
 
 Then import the component:
 
